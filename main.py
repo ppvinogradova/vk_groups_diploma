@@ -1,4 +1,4 @@
-from urllib.parse import urlencode
+#from urllib.parse import urlencode
 import requests
 
 # APP_ID = 7336572
@@ -20,6 +20,7 @@ class User:
 
   def __init__(self, id):
     self.id = id
+    self.user_friends = []
 
   def friends(self):
 
@@ -37,9 +38,8 @@ class User:
     a = get_friends.text.split('[')
     b = a[1].split(']')
     friends_list = b[0].split(',')
-    #print(friends_list)
-    
-    return friends_list
+    for id_num in friends_list:
+      self.user_friends.append(id_num)
 
   def groups(self):
 
@@ -57,9 +57,28 @@ class User:
 
     a = get_groups.text.split('[')
     b = a[1].split(']')
-    groups_set = set(b[0].split(','))
-    print(groups_set)
+    user_groups_set = set(b[0].split(','))
+    return user_groups_set
+
+  def friends_groups(self):
+
+    for id_num in self.user_friends:
+      request_params = {
+        'access_token': TOKEN,
+        'user_id': id_num,
+        'count': 1000,
+        'v': 5.103
+      }
+      get_friends_groups = requests.get(
+        'https://api.vk.com/method/groups.get',
+        params=request_params
+      )
+
+      response = get_friends_groups.text
+      if 'items' in response:
+        print(response)
 
 user = User(171691064)
 user.friends()
 user.groups()
+user.friends_groups()
