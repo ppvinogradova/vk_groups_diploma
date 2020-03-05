@@ -1,5 +1,6 @@
 #from urllib.parse import urlencode
 import requests
+import time
 
 # APP_ID = 7336572
 
@@ -21,6 +22,10 @@ class User:
   def __init__(self, id):
     self.id = id
     self.user_friends = []
+    self.user_groups_set = {}
+    self.user_groups_set = set()
+    self.friends_groups_set = {}
+    self.friends_groups_set = set()
 
   def friends(self):
 
@@ -57,8 +62,9 @@ class User:
 
     a = get_groups.text.split('[')
     b = a[1].split(']')
-    user_groups_set = set(b[0].split(','))
-    return user_groups_set
+    user_groups = b[0].split(',')
+    for id_num in user_groups:
+      self.user_groups_set.add(id_num)
 
   def friends_groups(self):
 
@@ -69,16 +75,29 @@ class User:
         'count': 1000,
         'v': 5.103
       }
-      get_friends_groups = requests.get(
-        'https://api.vk.com/method/groups.get',
-        params=request_params
-      )
+      try:
+        get_friends_groups = requests.get(
+          'https://api.vk.com/method/groups.get',
+          params=request_params
+        )
+        response = get_friends_groups.text
+        assert '"error_code":6' not in response
+      except AssertionError:
+        time.sleep(1)
+      finally:
+        if 'items' in response:
+          a = response.split('[')
+          b = a[1].split(']')
+          friends_groups = b[0].split(',')
+          for id_num in friends_groups:
+            self.friends_groups_set.add(id_num)
 
-      response = get_friends_groups.text
-      if 'items' in response:
-        print(response)
-
+  def find_secrets(self):
+    self.user_groups_set.difference_update(self.friends_groups_set)
+    print(self.user_groups_set)
+    
 user = User(171691064)
 user.friends()
 user.groups()
 user.friends_groups()
+user.find_secrets()
