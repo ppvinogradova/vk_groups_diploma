@@ -95,9 +95,24 @@ class User:
   def find_secrets(self):
     self.user_groups_set.difference_update(self.friends_groups_set)
     print(self.user_groups_set)
+
+  def output_info(self):
+    request_params = {
+      'access_token': TOKEN,
+      'group_ids': self.user_groups_set,
+      'fields': ['name', 'id', 'members_count'],
+      'v': 5.103
+    }
+    get_groups_info = requests.get(
+      'https://api.vk.com/method/groups.getById',
+      params=request_params
+    )
+    response = get_groups_info.text
+    print(response)
     
 user = User(171691064)
 user.friends()
 user.groups()
 user.friends_groups()
 user.find_secrets()
+user.output_info()
