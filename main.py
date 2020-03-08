@@ -116,7 +116,25 @@ class User:
     with open('groups.json', 'w') as f:
       json.dump(response_list, f)
 
-user = User(171691064)
+input_data = input('Введите id или короткое имя пользователя: ')
+def name_id(data):
+  if data.isdigit == True:
+    return data
+  else:
+    request_params = {
+      'access_token': TOKEN,
+      'user_ids': data,
+      'v': 5.103
+    }
+    get_user_info = requests.get(
+      'https://api.vk.com/method/users.get',
+      params=request_params
+    )
+    response = get_user_info.json()
+    id_num = response['response'][0]['id']
+    return id_num
+name = name_id(input_data)
+user = User(name)
 user.friends()
 user.groups()
 user.friends_groups()
