@@ -1,6 +1,7 @@
 #from urllib.parse import urlencode
 import requests
 import time
+import json
 
 # APP_ID = 7336572
 
@@ -94,22 +95,27 @@ class User:
 
   def find_secrets(self):
     self.user_groups_set.difference_update(self.friends_groups_set)
-    print(self.user_groups_set)
 
   def output_info(self):
-    request_params = {
-      'access_token': TOKEN,
-      'group_ids': self.user_groups_set,
-      'fields': ['name', 'id', 'members_count'],
-      'v': 5.103
-    }
-    get_groups_info = requests.get(
-      'https://api.vk.com/method/groups.getById',
-      params=request_params
-    )
-    response = get_groups_info.text
-    print(response)
-    
+    response_list = []
+    for group_id in self.user_groups_set:
+      request_params = {
+        'access_token': TOKEN,
+        'group_ids': group_id,
+        'fields': 'members_count',
+        'v': 5.103
+      }
+      get_groups_info = requests.get(
+        'https://api.vk.com/method/groups.getById',
+        params=request_params
+      )
+      response = get_groups_info.json()
+      dict_ = response['response'][0]
+      response_dict = {'name': dict_['name'], 'gid': dict_['id'], 'members_count': dict_['members_count']}
+      response_list.append(response_dict)
+    with open('groups.json', 'w') as f:
+      json.dump(response_list, f)
+
 user = User(171691064)
 user.friends()
 user.groups()
