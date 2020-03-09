@@ -40,6 +40,7 @@ class User:
       'https://api.vk.com/method/friends.get',
       params=request_params
     )
+    print('.')
     json_response = get_friends.json()
     friends_list = json_response['response']['items']
     for id_num in friends_list:
@@ -57,7 +58,8 @@ class User:
     get_groups = requests.get(
       'https://api.vk.com/method/groups.get',
       params=request_params
-    ) 
+    )
+    print('.')
     json_response = get_groups.json()
     user_groups = json_response['response']['items']
     for id_num in user_groups:
@@ -77,6 +79,7 @@ class User:
           'https://api.vk.com/method/groups.get',
           params=request_params
         )
+        print('.')
         response = get_friends_groups.text
         assert '"error_code":6' not in response
       except AssertionError:
@@ -104,6 +107,7 @@ class User:
         'https://api.vk.com/method/groups.getById',
         params=request_params
       )
+      print('.')
       response = get_groups_info.json()
       dict_ = response['response'][0]
       response_dict = {'name': dict_['name'], 'gid': dict_['id'], 'members_count': dict_['members_count']}
@@ -125,6 +129,7 @@ def name_id(data):
       'https://api.vk.com/method/users.get',
       params=request_params
     )
+    print('.')
     response = get_user_info.json()
     id_num = response['response'][0]['id']
     return id_num
