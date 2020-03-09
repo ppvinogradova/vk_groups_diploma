@@ -40,10 +40,8 @@ class User:
       'https://api.vk.com/method/friends.get',
       params=request_params
     )
-
-    a = get_friends.text.split('[')
-    b = a[1].split(']')
-    friends_list = b[0].split(',')
+    json_response = get_friends.json()
+    friends_list = json_response['response']['items']
     for id_num in friends_list:
       self.user_friends.append(id_num)
 
@@ -60,10 +58,8 @@ class User:
       'https://api.vk.com/method/groups.get',
       params=request_params
     ) 
-
-    a = get_groups.text.split('[')
-    b = a[1].split(']')
-    user_groups = b[0].split(',')
+    json_response = get_groups.json()
+    user_groups = json_response['response']['items']
     for id_num in user_groups:
       self.user_groups_set.add(id_num)
 
@@ -87,9 +83,8 @@ class User:
         time.sleep(1)
       finally:
         if 'items' in response:
-          a = response.split('[')
-          b = a[1].split(']')
-          friends_groups = b[0].split(',')
+          json_response = get_friends_groups.json()
+          friends_groups = json_response['response']['items']
           for id_num in friends_groups:
             self.friends_groups_set.add(id_num)
 
@@ -133,6 +128,7 @@ def name_id(data):
     response = get_user_info.json()
     id_num = response['response'][0]['id']
     return id_num
+    
 name = name_id(input_data)
 user = User(name)
 user.friends()
