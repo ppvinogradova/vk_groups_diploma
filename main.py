@@ -1,6 +1,7 @@
 #from urllib.parse import urlencode
 import requests
 import time
+import json
 
 # APP_ID = 7336572
 
@@ -39,10 +40,9 @@ class User:
       'https://api.vk.com/method/friends.get',
       params=request_params
     )
-
-    a = get_friends.text.split('[')
-    b = a[1].split(']')
-    friends_list = b[0].split(',')
+    print('.')
+    json_response = get_friends.json()
+    friends_list = json_response['response']['items']
     for id_num in friends_list:
       self.user_friends.append(id_num)
 
@@ -58,11 +58,10 @@ class User:
     get_groups = requests.get(
       'https://api.vk.com/method/groups.get',
       params=request_params
-    ) 
-
-    a = get_groups.text.split('[')
-    b = a[1].split(']')
-    user_groups = b[0].split(',')
+    )
+    print('.')
+    json_response = get_groups.json()
+    user_groups = json_response['response']['items']
     for id_num in user_groups:
       self.user_groups_set.add(id_num)
 
@@ -80,24 +79,65 @@ class User:
           'https://api.vk.com/method/groups.get',
           params=request_params
         )
+        print('.')
         response = get_friends_groups.text
         assert '"error_code":6' not in response
       except AssertionError:
         time.sleep(1)
       finally:
         if 'items' in response:
-          a = response.split('[')
-          b = a[1].split(']')
-          friends_groups = b[0].split(',')
+          json_response = get_friends_groups.json()
+          friends_groups = json_response['response']['items']
           for id_num in friends_groups:
             self.friends_groups_set.add(id_num)
 
   def find_secrets(self):
     self.user_groups_set.difference_update(self.friends_groups_set)
-    print(self.user_groups_set)
+
+  def output_info(self):
+    response_list = []
+    for group_id in self.user_groups_set:
+      request_params = {
+        'access_token': TOKEN,
+        'group_ids': group_id,
+        'fields': 'members_count',
+        'v': 5.103
+      }
+      get_groups_info = requests.get(
+        'https://api.vk.com/method/groups.getById',
+        params=request_params
+      )
+      print('.')
+      response = get_groups_info.json()
+      dict_ = response['response'][0]
+      response_dict = {'name': dict_['name'], 'gid': dict_['id'], 'members_count': dict_['members_count']}
+      response_list.append(response_dict)
+    with open('groups.json', 'w') as f:
+      json.dump(response_list, f)
+
+input_data = input('Введите id или короткое имя пользователя: ')
+def name_id(data):
+  if data.isdigit == True:
+    return data
+  else:
+    request_params = {
+      'access_token': TOKEN,
+      'user_ids': data,
+      'v': 5.103
+    }
+    get_user_info = requests.get(
+      'https://api.vk.com/method/users.get',
+      params=request_params
+    )
+    print('.')
+    response = get_user_info.json()
+    id_num = response['response'][0]['id']
+    return id_num
     
-user = User(171691064)
+name = name_id(input_data)
+user = User(name)
 user.friends()
 user.groups()
 user.friends_groups()
 user.find_secrets()
+user.output_info()
