@@ -41,10 +41,15 @@ class User:
       params=request_params
     )
     print('.')
-    json_response = get_friends.json()
-    friends_list = json_response['response']['items']
-    for id_num in friends_list:
-      self.user_friends.append(id_num)
+    response = get_friends.json()
+    try:
+      assert 'response' in response.keys()
+      friends_list = response['response']['items']
+      for id_num in friends_list:
+        self.user_friends.append(id_num)
+    except AssertionError:
+      print('Произошла ошибка запроса к API VK:')
+      print(response)
 
   def groups(self):
 
@@ -60,10 +65,15 @@ class User:
       params=request_params
     )
     print('.')
-    json_response = get_groups.json()
-    user_groups = json_response['response']['items']
-    for id_num in user_groups:
-      self.user_groups_set.add(id_num)
+    response = get_groups.json()
+    try:
+      assert 'response' in response.keys()
+      user_groups = response['response']['items']
+      for id_num in user_groups:
+        self.user_groups_set.add(id_num)
+    except AssertionError:
+      print('Произошла ошибка запроса к API VK:')
+      print(response)
 
   def friends_groups(self):
 
@@ -109,9 +119,14 @@ class User:
       )
       print('.')
       response = get_groups_info.json()
-      dict_ = response['response'][0]
-      response_dict = {'name': dict_['name'], 'gid': dict_['id'], 'members_count': dict_['members_count']}
-      response_list.append(response_dict)
+      try:
+        assert 'response' in response.keys()
+        dict_ = response['response'][0]
+        response_dict = {'name': dict_['name'], 'gid': dict_['id'], 'members_count': dict_['members_count']}
+        response_list.append(response_dict)
+      except AssertionError:
+        print('Произошла ошибка запроса к API VK:')
+        print(response)
     with open('groups.json', 'w') as f:
       json.dump(response_list, f)
 
@@ -131,8 +146,13 @@ def name_id(data):
     )
     print('.')
     response = get_user_info.json()
-    id_num = response['response'][0]['id']
-    return id_num
+    try:
+      assert 'response' in response.keys()
+      id_num = response['response'][0]['id']
+      return id_num
+    except AssertionError:
+      print('Произошла ошибка запроса к API VK:')
+      print(response)
     
 name = name_id(input_data)
 user = User(name)
