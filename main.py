@@ -93,7 +93,7 @@ class User:
         response = get_friends_groups.text
         assert '"error_code":6' not in response
       except AssertionError:
-        time.sleep(1)
+        time.sleep(1.500)
       finally:
         if 'items' in response:
           json_response = get_friends_groups.json()
