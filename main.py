@@ -1,3 +1,29 @@
+#LOGGING DECORATOR
+import datetime
+
+def log_into_path(path):
+  def logger_decor(old_foo):
+    def new_foo(*args, **kwargs):
+      log = open(path, 'w')
+      output = []
+      date = str(datetime.datetime.today())+'\n'
+      output.append(date)
+      something = old_foo(*args, **kwargs)
+      name = f'{old_foo}'+'\n'
+      output.append(name)
+      args = str(args)+'\n'
+      output.append(args)
+      kwargs = str(kwargs)+'\n'
+      output.append(kwargs)
+      result = str(something)+'\n'
+      output.append(result)
+      for line in output:
+        log.write(line)
+      log.close()
+      return something
+    return new_foo
+  return logger_decor
+
 #from urllib.parse import urlencode
 import requests
 import time
@@ -104,6 +130,7 @@ class User:
   def find_secrets(self):
     self.user_groups_set.difference_update(self.friends_groups_set)
 
+  @log_into_path('result.txt')
   def output_info(self):
     response_list = []
     for group_id in self.user_groups_set:
@@ -153,7 +180,7 @@ def name_id(data):
     except AssertionError:
       print('Произошла ошибка запроса к API VK:')
       print(response)
-    
+
 name = name_id(input_data)
 user = User(name)
 user.friends()
